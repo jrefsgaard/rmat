@@ -1,7 +1,0 @@
-/home/jrefsgaard/workspace/rmat/build/CMakeFiles/install/strip.dir
-/home/jrefsgaard/workspace/rmat/build/CMakeFiles/install/local.dir
-/home/jrefsgaard/workspace/rmat/build/CMakeFiles/RMat.dir
-/home/jrefsgaard/workspace/rmat/build/CMakeFiles/edit_cache.dir
-/home/jrefsgaard/workspace/rmat/build/CMakeFiles/rebuild_cache.dir
-/home/jrefsgaard/workspace/rmat/build/CMakeFiles/install.dir
-/home/jrefsgaard/workspace/rmat/build/CMakeFiles/list_install_components.dir
