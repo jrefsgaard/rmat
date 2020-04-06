@@ -33,9 +33,9 @@ double MetropolisWalker::Evaluate(vector<double> x)
   step.x = x;
   step.value = val;
   history.push_back(step);
-  cout << val ;
-  for(double xi : x){ cout << "  " << xi ;}
-  cout << endl;
+  //cout << val ;
+  //for(double xi : x){ cout << "  " << xi ;}
+  //cout << endl;
   return val;
 }
 
@@ -60,6 +60,7 @@ void MetropolisWalker::Walk(vector<double> x0, int steps)
   
   //Start the random walk.
   for(int i=0; i<steps; i++){
+    if(i % 100 == 0) cout << "Step no. " << i << endl;
     position.push_back(position.back()); //Copy the (i-1)'th entry.
     vector<double> & xi = position.back().x;
     for(int j=0; j<dim; j++){
