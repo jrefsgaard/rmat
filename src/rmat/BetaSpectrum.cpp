@@ -35,6 +35,7 @@ double BetaSpectrum::Strength(double Ec)
   int A = system.A();
   int Zf = system.Z();
   int Zi = Zf - dZ;
+  cout << "A = " << A << ", Zf = " << Zf << ", Zi = " << Zi << endl;
   double W = 0.;
   int Nl = system.GetNLevels();  
   for(int c : outChannels){  //Loop over specified outgoing channels.
