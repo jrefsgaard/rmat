@@ -35,18 +35,18 @@ double BetaSpectrum::Strength(double Ec)
   int A = system.A();
   int Zf = system.Z();
   int Zi = Zf - dZ;
-  cout << "A = " << A << ", Zf = " << Zf << ", Zi = " << Zi << endl;
+  //cout << "A = " << A << ", Zf = " << Zf << ", Zi = " << Zi << endl;
   double W = 0.;
   int Nl = system.GetNLevels();  
   for(int c : outChannels){  //Loop over specified outgoing channels.
     double Ex = Ec + system.GetThreshold(c);
-    cout << "Ex = " << Ex << endl;
+    //cout << "Ex = " << Ex << endl;
     double fBeta = 0.;
     try { fBeta = logft::calculatePhaseSpace(Zi,Zf,A,Ex);} 
     catch (...) { fBeta = 0.;}                               //Very clever!
-    cout << "fBeta = " << fBeta << endl;
+    //cout << "fBeta = " << fBeta << endl;
     double Pc = system.GetChannel(c).Penetrability(Ec);
-    cout << "Pc = " << Pc << endl;
+    //cout << "Pc = " << Pc << endl;
     vector<double> Js = system.GetJs();
     for(double J : Js){
       arma::Mat<complex<double>> A = system.LevelMatrix(Ex,J);  //Reduced level matrix
@@ -76,7 +76,7 @@ double BetaSpectrum::Strength(double Ec)
   //double factor =  N * halflife / Log(2.);
   //double binning = 10.;
   //double strength = binning * W * factor * C2; 
-  cout << "strength = " << strength << endl;
+  //cout << "strength = " << strength << endl;
   return strength;
 }
 
