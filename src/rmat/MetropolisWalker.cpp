@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <cmath>
 #include <TRandom3.h>
+#include <TTree.h>
+#include <TFile.h>
 
 using namespace std;
 
@@ -183,5 +185,32 @@ ParameterInfo & MetropolisWalker::GetParOptions(int ipar)
 vector<ParameterInfo> & MetropolisWalker::GetParOptions()
 {
   return options;
+}
+
+void MetropolisWalker::SaveTree(string fileName)
+{
+  TFile outFile(fileName.c_str(),"RECREATE");
+  TTree *tree = new TTree("walk","Result of Metropolis algorithm.");
+  int dim = position.at(0).x.size();
+  double val;
+  tree->Branch("val",&val);
+  double *p = new double(dim);
+  //cout << "Creating branches..." << endl;
+  for(int i=0; i<dim; i++){
+    char branchName[32];
+    sprintf(branchName,"p%d",i);
+    tree->Branch(branchName,p+i);
+  }
+  //cout << "Filling the tree..." << endl;
+  for(Step & step : position){
+    val = step.value;
+    for(int i=0; i<dim; i++){
+      p[i] = step.x[i];
+    }
+    tree->Fill();
+  }
+  //cout << "Writing to file..." << endl;
+  tree->Write();
+  outFile.Close();
 }
 }

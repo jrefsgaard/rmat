@@ -1,6 +1,7 @@
 #ifndef METROPOLIS_WALKER_H
 #define METROPOLIS_WALKER_H
 #include <vector>
+#include <string>
 #include "Math/Functor.h"
 
 namespace rmat {
@@ -48,6 +49,8 @@ class MetropolisWalker {
     std::vector<Step> & GetHistory();
     ParameterInfo & GetParOptions(int ipar);
     std::vector<ParameterInfo> & GetParOptions();
+
+    void SaveTree(std::string fileName);
 };
 }
 #endif

@@ -31,6 +31,7 @@ void BetaSpectrum::EnsureSize(std::vector<double> & g)
     
 double BetaSpectrum::Strength(double Ec)
 {
+  //cout << "Ec = " << Ec << endl;
   int A = system.A();
   int Zf = system.Z();
   int Zi = Zf - dZ;
@@ -38,13 +39,16 @@ double BetaSpectrum::Strength(double Ec)
   int Nl = system.GetNLevels();  
   for(int c : outChannels){  //Loop over specified outgoing channels.
     double Ex = Ec + system.GetThreshold(c);
+    //cout << "Ex = " << Ex << endl;
     double fBeta = 0.;
     try { fBeta = logft::calculatePhaseSpace(Zi,Zf,A,Ex);} 
     catch (...) { fBeta = 0.;}                               //Very clever!
     double Pc = system.GetChannel(c).Penetrability(Ec);
+    //cout << "Pc = " << Pc << endl;
     vector<double> Js = system.GetJs();
     for(double J : Js){
       arma::Mat<complex<double>> A = system.LevelMatrix(Ex,J);  //Reduced level matrix
+      //cout << "Level matrix" << endl;
       vector<int> indices = system.GetLevelIndices(J);
       complex<double> amplitude(0,0);
       for(int i=0; i<indices.size(); i++){

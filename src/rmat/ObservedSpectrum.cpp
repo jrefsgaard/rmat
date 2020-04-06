@@ -24,7 +24,9 @@ void ObservedSpectrum::CalculateSpectrum()
   raw.set_size(nbins);
   for(int i=0; i<nbins; i++){
     double ei = Bin2Energy(i);
+    //cout << "ei = " << ei << endl;
     double si = model->Strength(ei);
+    //cout << "si = " << si << endl;
     //cout << "Calc: i = " << i << ",  ei = " << ei << ",  si = " << si << endl;
     raw(i) = si;
   }
@@ -75,8 +77,8 @@ void ObservedSpectrum::SetResponse(TMatrixD &r)
     }
   }
   
-  //Response has changed, update spectrum.
-  CalculateSpectrum();
+  //Response has changed, update spectrum. (Dangerous).
+  //CalculateSpectrum();
 }
 
 //Returns the center of the energy bin 'i'.
