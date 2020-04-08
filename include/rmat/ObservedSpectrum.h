@@ -21,6 +21,7 @@ class ObservedSpectrum : public Spectrum {
     arma::Col<double> observed;
     double emin, emax;
     int rebin;
+    std::pair<bool,double> spinSelect;
     
     void SetResponse(TMatrixD &r); 
     void CalculateSpectrum();
@@ -33,6 +34,7 @@ class ObservedSpectrum : public Spectrum {
     ~ObservedSpectrum();
     
     double Strength(double Ec);
+    double Strength(double Ec, double J);
     void SetParameters(std::vector<double> par);
     void PrintParameters();
     int NDim();

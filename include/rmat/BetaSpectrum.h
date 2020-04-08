@@ -33,6 +33,9 @@ class BetaSpectrum : public RMatrixSpectrum {
     virtual void SetParameters(std::vector<double> par);
     int NDim();
     virtual void PrintParameters();
+
+    //Decay strength from a given nuclear spin.
+    double Strength(double Ec, double J);
     
     void SetType(std::string type);
     //There are at least four different ways to characterise the

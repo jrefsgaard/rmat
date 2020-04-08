@@ -80,6 +80,45 @@ double BetaSpectrum::Strength(double Ec)
   return strength;
 }
 
+double BetaSpectrum::Strength(double Ec, double J)
+{
+  //cout << "Ec = " << Ec << endl;
+  int A = system.A();
+  int Zf = system.Z();
+  int Zi = Zf - dZ;
+  //cout << "A = " << A << ", Zf = " << Zf << ", Zi = " << Zi << endl;
+  double W = 0.;
+  int Nl = system.GetNLevels();  
+  for(int c : outChannels){  //Loop over specified outgoing channels.
+    double Ex = Ec + system.GetThreshold(c);
+    //cout << "Ex = " << Ex << endl;
+    double fBeta = 0.;
+    try { fBeta = logft::calculatePhaseSpace(Zi,Zf,A,Ex);} 
+    catch (...) { fBeta = 0.;}                               //Very clever!
+    //cout << "fBeta = " << fBeta << endl;
+    double Pc = system.GetChannel(c).Penetrability(Ec);
+    //cout << "Pc = " << Pc << endl;
+     arma::Mat<complex<double>> A = system.LevelMatrix(Ex,J);  //Reduced level matrix
+      //cout << "Level matrix" << endl;
+    vector<int> indices = system.GetLevelIndices(J);
+    complex<double> amplitude(0,0);
+    for(int i=0; i<indices.size(); i++){
+      int l = indices.at(i);
+      for(int j=0; j<indices.size(); j++){
+        int m = indices.at(j);
+        double Bl = Bbeta.at(l);
+        double gammamc = system.GetWidthAmplitude(m,c);
+        amplitude += Bl * gammamc * A(i,j);
+      }
+    }
+    double wc = fBeta * Pc * pow(abs(amplitude),2);  
+    W += wc;
+  }
+  
+  double strength = W;
+  return strength;
+}
+
 void BetaSpectrum::SetType(std::string type)
 {
   if(type == "-") dZ = 1;

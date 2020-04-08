@@ -1,4 +1,5 @@
 #include <rmat/ObservedSpectrum.h>
+#include <rmat/RMatrixUtils.h>
 #include <iostream>
 
 using namespace std;
@@ -10,6 +11,7 @@ ObservedSpectrum::ObservedSpectrum(shared_ptr<Spectrum> m, TMatrixD &r, double E
 : model(m), emin(Emin), emax(Emax)
 { 
   rebin = 1;
+  spinSelect.first = false;
   SetResponse(r);
 }
 
@@ -25,7 +27,7 @@ void ObservedSpectrum::CalculateSpectrum()
   for(int i=0; i<nbins; i++){
     double ei = Bin2Energy(i);
     //cout << "ei = " << ei << endl;
-    double si = model->Strength(ei);
+    double si = spinSelect.first ? model->Strength(ei,spinSelect.second) : model->Strength(ei);
     //cout << "si = " << si << endl;
     //cout << "Calc: i = " << i << ",  ei = " << ei << ",  si = " << si << endl;
     raw(i) = si;
@@ -106,6 +108,27 @@ int ObservedSpectrum::Energy2Bin(double E)
 
 double ObservedSpectrum::Strength(double Ec)
 {
+  if(spinSelect.first){
+    spinSelect.first = false;
+    CalculateSpectrum();
+  }
+  int i = Energy2Bin(Ec);
+  //cout << " Strength: Ec = " << Ec << ",  i = " << i << endl;
+  double si = observed(i);
+  return si;
+}
+
+double ObservedSpectrum::Strength(double Ec, double J)
+{
+  if(!spinSelect.first){
+    spinSelect.first = true;
+    spinSelect.second = J;
+    CalculateSpectrum();
+  }
+  else if(spinSelect.first && !IsAlmostEqual(spinSelect.second,J)){
+    spinSelect.second = J;
+    CalculateSpectrum();
+  }
   int i = Energy2Bin(Ec);
   //cout << " Strength: Ec = " << Ec << ",  i = " << i << endl;
   double si = observed(i);

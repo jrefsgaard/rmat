@@ -19,6 +19,7 @@ class Spectrum {
     virtual ~Spectrum();
     
     virtual double Strength(double Ec) = 0;
+    virtual double Strength(double Ec, double J) = 0;
     virtual void SetParameters(std::vector<double> par) = 0;
     virtual void PrintParameters() = 0;
     virtual int NDim() = 0;
