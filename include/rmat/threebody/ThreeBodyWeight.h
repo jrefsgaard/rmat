@@ -10,6 +10,7 @@
 #include "SimEvent.h"
 #include "../ClebschGordan.h"
 #include "../SphericalHarmonic.h"
+#include <TRotation.h>
 
 namespace rmat {
 namespace threebody {
@@ -33,7 +34,8 @@ class ThreeBodyWeight : public DecayWeight {
     ~ThreeBodyWeight();
     
     //virtual double Calculate(std::array<TLorentzVector,3> &);
-    virtual double Calculate(SimEvent &);
+    virtual double Calculate(SimEvent &event);
+    virtual double Calculate(SimEvent &event, std::vector<TRotation> &rotations);
     
     /**
     * Std. ordering: First parameters for primary compound system, then for secondary system.

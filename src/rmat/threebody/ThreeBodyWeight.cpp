@@ -201,6 +201,12 @@ void ThreeBodyWeight::DoCoulombCorrection(double radius)
 
 double ThreeBodyWeight::Calculate(SimEvent &event)
 {
+  vector<TRotation> v {TRotation()}; //Identity rotation.
+  return Calculate(event,v);
+}
+
+double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
+{
   //Return 0 if this observed Q-value has been excluded from the calculation.
   double Qobs = event.Q;
   for(auto range : excludedQs){
@@ -228,10 +234,17 @@ double ThreeBodyWeight::Calculate(SimEvent &event)
   int JbMax = ReturnMaxSpin(scheme.GetJs(1));
   
   //We construct a matrix to hold the complex amplitudes from the giant summation below.
-  Mat<complex<double>> amplitudes(JaMax+1,2*JaMax+1);
+  //Mat<complex<double>> amplitudes(JaMax+1,2*JaMax+1);
+  Cube<complex<double>> amplitudes(JaMax+1,2*JaMax+1,rotations.size());
   complex<double> zero(0.,0.);
   complex<double> i(0.,1.);
   amplitudes.fill(zero);
+  
+  //Limit of 100 related to container for pre-calculated Ylm.
+  if(rotations.size()>100){
+    cout << "ThreeBodyWeight::Calculate(): Too many rotations." << endl;
+    exit(EXIT_FAILURE);
+  }  
 
   //cout << "line 171" << endl;
   
@@ -255,16 +268,42 @@ double ThreeBodyWeight::Calculate(SimEvent &event)
       TLorentzVector alpha2 = decay.at((j+1)%3);
       TLorentzVector alpha3 = decay.at((j+2)%3);  
       //cout << "line 187" << endl;
+      
+      //Initialise structures to hold values of spherical harmonics.
+      vector<Mat<complex<double>>> y1(100,Mat<complex<double>>(3,5));
+      vector<Mat<complex<double>>> y2(100,Mat<complex<double>>(3,5));
     
       //We find angles and energies.
       double E1 = (alpha1.Energy() - alpha1.M());
-      double theta1angle = alpha1.Theta();
-      double phi1angle = alpha1.Phi();  //Mind confusion with HS phase shift!
-      
       TLorentzVector rcm = alpha2 + alpha3;     //Recoil center of mass system.
       alpha2.Boost(-rcm.BoostVector());
-      double theta2 = alpha2.Theta();
-      double phi2 = alpha2.Phi();
+      
+      TLorentzVector alpha1_bk = alpha1;
+      TLorentzVector alpha2_bk = alpha2;
+      for(int ri=0; ri<rotations.size(); ri++){
+        alpha1 *= rotations.at(ri);
+        double theta1angle = alpha1.Theta();
+        double phi1angle = alpha1.Phi();  //Mind confusion with HS phase shift!
+        y1.at(ri)(0,0) = sphericalHarmonic.Value(0,0,theta1angle,phi1angle);
+        y1.at(ri)(2,0) = sphericalHarmonic.Value(2,-2,theta1angle,phi1angle);
+        y1.at(ri)(2,1) = sphericalHarmonic.Value(2,-1,theta1angle,phi1angle);
+        y1.at(ri)(2,2) = sphericalHarmonic.Value(2,0,theta1angle,phi1angle);
+        y1.at(ri)(2,3) = sphericalHarmonic.Value(2,1,theta1angle,phi1angle);
+        y1.at(ri)(2,4) = sphericalHarmonic.Value(2,2,theta1angle,phi1angle);
+        
+        alpha2 *= rotations.at(ri);
+        double theta2 = alpha2.Theta();
+        double phi2 = alpha2.Phi();
+        y2.at(ri)(0,0) = sphericalHarmonic.Value(0,0,theta2,phi2);
+        y2.at(ri)(2,0) = sphericalHarmonic.Value(2,-2,theta2,phi2);
+        y2.at(ri)(2,1) = sphericalHarmonic.Value(2,-1,theta2,phi2);
+        y2.at(ri)(2,2) = sphericalHarmonic.Value(2,0,theta2,phi2);
+        y2.at(ri)(2,3) = sphericalHarmonic.Value(2,1,theta2,phi2);
+        y2.at(ri)(2,4) = sphericalHarmonic.Value(2,2,theta2,phi2);
+      }
+      alpha1 = alpha1_bk;
+      alpha2 = alpha2_bk;
+
       alpha2.Boost(rcm.BoostVector());
 
       rcm.Boost(-rcm.BoostVector());
@@ -368,19 +407,27 @@ double ThreeBodyWeight::Calculate(SimEvent &event)
                         //Ylm1 *= pow(i,L1);
                         //complex<double> Ylm2(SphericalHarmonic(L2,mb,theta2,phi2));
                         //Ylm2 *= pow(i,L2);
-                        complex<double> Ylm1(sphericalHarmonic.Value(L1,ma-mb,theta1angle,phi1angle));
-                        //Ylm1 *= pow(i,L1);
-                        complex<double> Ylm2(sphericalHarmonic.Value(L2,mb,theta2,phi2));
-                        //Ylm2 *= pow(i,L2);
-                        //cout << "Old way: " << Ylm1 << ",  " << Ylm2 << endl;
-                        //cout << "New way: " << Ylm1_n << ",  " << Ylm2_n << endl;
-                        complex<double> f = Cmmj * Ylm1 * Ylm2 * Omega1 * Omega23  * A1(m,n) * gammaLambda * sqrt(2.*P1/rho1 *FSCI)
-                                            * Bmu * A2(mp,np) * gammaLambdap*sqrt(2.*P23/rho23);
-                        //complex<double> f = Cmmj * Ylm1 * Ylm2 * Omega1 * Omega23  * A1(m,n) * gammaLambda * sqrt(2.*P1) //*FSCI)
-                        //                    * Bmu * A2(mp,np) * gammaLambdap*sqrt(2.*P23/rho23);
-                        //cout << ",  accessing element (" << Ja << "," << ma+JaMax << "). = " << f << endl;
-                        amplitudes(Ja,ma+JaMax) += f;
-                        //cout << "weight = " << norm(f) << endl;                 
+                        complex<double> f = Cmmj * Omega1 * Omega23  * A1(m,n) 
+                        * gammaLambda * sqrt(2.*P1/rho1 *FSCI) * Bmu * A2(mp,np)
+                        * gammaLambdap*sqrt(2.*P23/rho23);
+                        for(int ri=0; ri<rotations.size(); ri++){
+                          complex<double> Ylm1(y1.at(ri)(L1,ma-mb+L1));
+                          //complex<double> Ylm1(sphericalHarmonic.Value(L1,ma-mb,theta1angle,phi1angle));
+                          //Ylm1 *= pow(i,L1);
+                          complex<double> Ylm2(y2.at(ri)(L2,mb+L2));
+                          //complex<double> Ylm2(sphericalHarmonic.Value(L2,mb,theta2,phi2));
+                          //Ylm2 *= pow(i,L2);
+                          //cout << "Old way: " << Ylm1 << ",  " << Ylm2 << endl;
+                          //cout << "New way: " << Ylm1_n << ",  " << Ylm2_n << endl;
+                          //complex<double> f = Cmmj * Ylm1 * Ylm2 * Omega1 * Omega23  * A1(m,n) * gammaLambda * sqrt(2.*P1/rho1 *FSCI)
+                          //                  * Bmu * A2(mp,np) * gammaLambdap*sqrt(2.*P23/rho23);
+                          complex<double> fi = f * Ylm1 * Ylm2;
+                          //complex<double> f = Cmmj * Ylm1 * Ylm2 * Omega1 * Omega23  * A1(m,n) * gammaLambda * sqrt(2.*P1) //*FSCI)
+                          //                    * Bmu * A2(mp,np) * gammaLambdap*sqrt(2.*P23/rho23);
+                          //cout << ",  accessing element (" << Ja << "," << ma+JaMax << "). = " << f << endl;
+                          amplitudes(Ja,ma+JaMax,ri) += fi;
+                          //cout << "weight = " << norm(f) << endl;
+                        }                
                       }
                     }
                   }
@@ -393,7 +440,8 @@ double ThreeBodyWeight::Calculate(SimEvent &event)
     }
   }
 
-  double weight = sum(sum(square(abs(amplitudes))));
+  //double weight = sum(sum(square(abs(amplitudes))));
+  double weight = accu(square(abs(amplitudes))) / rotations.size();
   
   //Calculate the beta-decay phase-space factor.
   double fBeta = 0.;
