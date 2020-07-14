@@ -198,13 +198,13 @@ void ThreeBodyWeight::DoCoulombCorrection(double radius)
   CoulombCorrector newCorrector(scheme,radius);
   coulombCorrector = newCorrector;
 }
-
+/*
 double ThreeBodyWeight::Calculate(SimEvent &event)
 {
   vector<TRotation> v {TRotation()}; //Identity rotation.
   return Calculate(event,v);
 }
-
+*/
 double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
 {
   //Return 0 if this observed Q-value has been excluded from the calculation.
@@ -275,12 +275,14 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
     
       //We find angles and energies.
       double E1 = (alpha1.Energy() - alpha1.M());
+      //cout << "  E1 = " << E1 << endl;
       TLorentzVector rcm = alpha2 + alpha3;     //Recoil center of mass system.
       alpha2.Boost(-rcm.BoostVector());
       
       TLorentzVector alpha1_bk = alpha1;
       TLorentzVector alpha2_bk = alpha2;
       for(int ri=0; ri<rotations.size(); ri++){
+        //cout << "  Rot no: " << ri << endl;
         alpha1 *= rotations.at(ri);
         double theta1angle = alpha1.Theta();
         double phi1angle = alpha1.Phi();  //Mind confusion with HS phase shift!
@@ -391,6 +393,7 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
                     for(int ma=-Ja; ma<=Ja; ma++){
                       //cout << ",  ma = " << ma ;
                       for(int mb = -Jb; mb <= Jb; mb++){
+                        if(abs(ma-mb) > L1) continue;
                         //cout << FSCI << endl;
                         //cout << ",  mb = " << mb ;
                         //cout << "Old CG = " << ClebschGordanFCN(L1,Jb,Ja,ma-mb,mb,ma) << endl;
@@ -411,9 +414,11 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
                         * gammaLambda * sqrt(2.*P1/rho1 *FSCI) * Bmu * A2(mp,np)
                         * gammaLambdap*sqrt(2.*P23/rho23);
                         for(int ri=0; ri<rotations.size(); ri++){
+                          //cout << "  Ylm1(" << L1 << "," << ma-mb+L1 << ")" << endl;
                           complex<double> Ylm1(y1.at(ri)(L1,ma-mb+L1));
                           //complex<double> Ylm1(sphericalHarmonic.Value(L1,ma-mb,theta1angle,phi1angle));
                           //Ylm1 *= pow(i,L1);
+                          //cout << "  L2 = " << L2 << ",  mb+L2 = " << mb+L2 << endl;
                           complex<double> Ylm2(y2.at(ri)(L2,mb+L2));
                           //complex<double> Ylm2(sphericalHarmonic.Value(L2,mb,theta2,phi2));
                           //Ylm2 *= pow(i,L2);

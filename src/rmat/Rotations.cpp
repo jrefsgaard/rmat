@@ -35,3 +35,13 @@ vector<TRotation> & Rotations::GetRotations()
 {
   return rotations;
 }
+
+/*
+vector<TRotation> Rotations::GetRotation(int N)
+{
+  auto first = rotations.begin();
+  auto last = rotations.begin() + N;
+  vector<TRotation> vec(first,last);
+  return vec;
+}
+*/

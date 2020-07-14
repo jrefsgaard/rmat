@@ -18,5 +18,7 @@ class Rotations {
     const TRotation & GetRotation(int i);
     
     std::vector<TRotation> & GetRotations();
+
+    //std::vector<TRotation> GetRotation(int i);
 };
 #endif
