@@ -19,7 +19,8 @@ class SimulationError : public ROOT::Math::IMultiGenFunction {
   */
   private:
     //Some members have to be mutable, since they are modified in a 'const' fcn.
-    mutable Simulator _model;
+    //mutable Simulator _model;
+    std::shared_ptr<Simulator> _model;
     std::shared_ptr<TH1> _data;
     mutable int nBins;
     bool normalise;
@@ -27,7 +28,7 @@ class SimulationError : public ROOT::Math::IMultiGenFunction {
     virtual double DoEval(const double *x) const override;
     
   public:
-    SimulationError(Simulator model, std::shared_ptr<TH1> data);
+    SimulationError(std::shared_ptr<Simulator> model, std::shared_ptr<TH1> data);
     ~SimulationError();
     
     //XXX
@@ -50,7 +51,7 @@ class SimulationError : public ROOT::Math::IMultiGenFunction {
     */
     void AutoNormalise(bool arg = true);
     
-    void SetModel(Simulator model);
+    void SetModel(std::shared_ptr<Simulator> model);
     void SetData(std::shared_ptr<TH1> data);
 
     Simulator & GetModel();

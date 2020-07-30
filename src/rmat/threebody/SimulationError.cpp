@@ -9,7 +9,7 @@
 using namespace std;
 namespace rmat::threebody {
 
-SimulationError::SimulationError(Simulator model, std::shared_ptr<TH1> data)
+SimulationError::SimulationError(shared_ptr<Simulator> model, shared_ptr<TH1> data)
 : _model(model), _data(data) {normalise = true;}
 
 SimulationError::~SimulationError(){}
@@ -23,8 +23,8 @@ double SimulationError::DoEval(const double *x) const
 double SimulationError::Evaluate() const
 {
   //Perform simulation.
-  long long int N = _model.Simulate();
-  //cout << "N = " << N << endl;
+  double N = _model->Simulate();
+  cout << "N = " << N << endl;
   
   //Obtain simulated spectrum.
   int nx = _data->GetXaxis()->GetNbins();
@@ -39,7 +39,7 @@ double SimulationError::Evaluate() const
   double zmin = _data->GetZaxis()->GetXmin();
   double zmax = _data->GetZaxis()->GetXmax();
   //cout << "nz = " << nz << ", zmin = " << zmin << ", zmax = " << zmax << endl;
-  shared_ptr<TH1> result = _model.GetSpectrum(nx,xmin,xmax,ny,ymin,ymax,nz,zmin,zmax);
+  shared_ptr<TH1> result = _model->GetSpectrum(nx,xmin,xmax,ny,ymin,ymax,nz,zmin,zmax);
 
   //TFile outfile("~/workspace/i161/fit_test/test.root","RECREATE");
   //_data->Write("data");
@@ -53,7 +53,7 @@ double SimulationError::Evaluate() const
       auto cast_histogram = dynamic_pointer_cast<TH3>(_data);
       integral = cast_histogram->Integral();
       //cout << "integral = " << integral << endl;
-      vector<array<double,2>> ranges = _model.GetDecayWeight().GetExcludedQRanges();
+      vector<array<double,2>> ranges = _model->GetDecayWeight().GetExcludedQRanges();
       for(auto range : ranges){
         //These limits assume that the user ranges correspond to whole bins.
         int minBin = cast_histogram->GetZaxis()->FindBin(range[0]);
@@ -71,7 +71,7 @@ double SimulationError::Evaluate() const
       //Standard 1D-spectrum with Q-values.
       integral = _data->Integral();
       //cout << "integral = " << integral << endl;
-      vector<array<double,2>> ranges = _model.GetDecayWeight().GetExcludedQRanges();
+      vector<array<double,2>> ranges = _model->GetDecayWeight().GetExcludedQRanges();
       for(auto range : ranges){
         int minBin = _data->GetXaxis()->FindBin(range[0]);
         int maxBin = _data->GetXaxis()->FindBin(range[1])-1;
@@ -97,29 +97,29 @@ double SimulationError::Evaluate() const
 
   nBins = error.GetNBins();
 
-  //cout << "Error = " << errValue << ",  nBins = " << nBins << ",  Nsim = " << N << ",  Ndata = " << _data->Integral() << endl;
+  cout << "Error = " << errValue << ",  nBins = " << nBins << ",  Nsim = " << N << ",  Ndata = " << _data->Integral() << endl;
   
   return errValue;
 }
 
 unsigned int SimulationError::NDim() const
 {
-  return _model.NDim();
+  return _model->NDim();
 }
 
 void SimulationError::SetParameters(const double *par) const
 {
-  int ndim = _model.NDim();
+  int ndim = _model->NDim();
   vector<double> pv;
   pv.assign(par,par + ndim);
-  _model.SetParameters(pv);
+  _model->SetParameters(pv);
   //XXX
   //_model.GetDecayWeight().PrintParameters();
 }
 
 void SimulationError::PrintParameters()
 {
-  _model.GetDecayWeight().PrintParameters();
+  _model->GetDecayWeight().PrintParameters();
 }
 
 ROOT::Math::IBaseFunctionMultiDim * SimulationError::Clone() const
@@ -128,7 +128,7 @@ ROOT::Math::IBaseFunctionMultiDim * SimulationError::Clone() const
   return clone;
 }
 
-void SimulationError::SetModel(Simulator model)
+void SimulationError::SetModel(shared_ptr<Simulator> model)
 {
   _model = model;
 }
@@ -140,7 +140,7 @@ void SimulationError::SetData(std::shared_ptr<TH1> data)
 
 Simulator & SimulationError::GetModel()
 {
-  return _model;
+  return *(_model.get());
 }
 
 shared_ptr<TH1> SimulationError::GetData()

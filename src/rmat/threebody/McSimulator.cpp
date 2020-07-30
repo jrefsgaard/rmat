@@ -1,6 +1,6 @@
 #include <iostream>
 #include <TDatime.h>
-#include <rmat/threebody/Simulator.h>
+#include <rmat/threebody/McSimulator.h>
 #include <rmat/threebody/WeightCalculator.h>
 #include <rmat/threebody/Sampler.h>
 #include <rmat/threebody/Binner.h>
@@ -8,18 +8,13 @@
 using namespace std;
 
 namespace rmat::threebody {
-/*
-Simulator::Simulator(shared_ptr<DecayWeight> w, vector<SimEvent> pool)
-: weight(w), eventPool(move(pool)), accepted(eventPool.size(),false)
-{}
-    
-Simulator::~Simulator() {}
-*/
-Simulator::Simulator(shared_ptr<DecayWeight> w)
-: weight(w) {}
 
-/*  
-long long int Simulator::Simulate()
+McSimulator::McSimulator(shared_ptr<DecayWeight> w, vector<SimEvent> pool)
+: Simulator(w), eventPool(move(pool)), accepted(eventPool.size(),false)
+{}
+
+ 
+double McSimulator::Simulate()
 {
   TDatime timer;
   
@@ -41,7 +36,7 @@ long long int Simulator::Simulate()
 }
 
 
-shared_ptr<TH1> Simulator::GetSpectrum(int nx, double xMin, double xMax,
+shared_ptr<TH1> McSimulator::GetSpectrum(int nx, double xMin, double xMax,
                                        int ny, double yMin, double yMax,
                                        int nz, double zMin, double zMax)
 {
@@ -55,36 +50,13 @@ shared_ptr<TH1> Simulator::GetSpectrum(int nx, double xMin, double xMax,
   return binner.Bin(eventPool,accepted);
 }
 
-void Simulator::SetPool(std::vector<SimEvent> pool)
+void McSimulator::SetPool(std::vector<SimEvent> pool)
 {
   eventPool = pool;
 }
-*/
- 
-void Simulator::SetDecayWeight(shared_ptr<DecayWeight> w)
-{
-  weight = w;
-}
 
-/*
-vector<SimEvent> & Simulator::GetPool()
+vector<SimEvent> & McSimulator::GetPool()
 {
   return eventPool;
-}
-*/
-
-DecayWeight & Simulator::GetDecayWeight()
-{
-  return *(weight.get());
-}
-
-unsigned int Simulator::NDim()
-{
-  return weight->NDim();
-}
-
-void Simulator::SetParameters(vector<double> par)
-{
-  weight->SetParameters(par);
 }
 } //namespace rmat::threebody

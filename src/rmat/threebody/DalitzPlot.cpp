@@ -15,7 +15,11 @@ DalitzPlot::DalitzPlot(shared_ptr<DecayWeight> w) : weight(w) {}
 
 double DalitzPlot::Value(double x, double y, double Q)
 {
-  if(y <= -1./Sqrt(3)*x || y >= 1./Sqrt(3)*x || x < 0 || x*x + y*y >= 0.999) return 0.0;
+  double E23 = 100; //Minimum E23, to cut away 8Be(gs).
+  if(y <= -1./Sqrt(3)*x || y >= 1./Sqrt(3)*x || x < 0
+    || x*x + y*y >= 0.999
+    || y < (Sqrt(3)*x-2.+4.*E23/Q)) return 0.0;
+
   //if(x*x + y*y >= 0.999) return 0.0;
 
   //Calculate kinetic energies from Dalitz coordinates.
@@ -23,11 +27,15 @@ double DalitzPlot::Value(double x, double y, double Q)
   double E2 = (y + 1)/3. * Q;
   double E3 = Q - E1 - E2;
 
-  //cout << E1 << "  " << E2 << "  " << E3 << endl;
+  //cout << "x = " << x << ", y = " << y << ", Q = " << Q << endl;
+  //cout << "  E1 = " << E1 << ", E2 = " << E2 << ", E3 = " << E3 << endl;
 
   double eps1 = 3./2.*E1; //Energy released in first breakup.
   double eps2 = Q - eps1; //Energy released in second breakup.
+  
+  //cout << "  eps1 = " << eps1 << ", eps2 = " << eps2 << endl;
   double thetap = ACos(Sqrt(3./(eps1*eps2))*(E2 - eps2/2. - eps1/6.)); //Breakup angle in recoil com.
+  //cout << "  thetap = " << thetap ;
 
   //Calculate momenta.
   Nucleus He4(4,2,0,1);
@@ -43,9 +51,21 @@ double DalitzPlot::Value(double x, double y, double Q)
 
   double theta21 = ATan(Sin(thetap)/(Sqrt(eps1/(3*eps2))+Cos(thetap)));
   double theta22 = ATan(Sin(thetap)/(Sqrt(eps1/(3*eps2))-Cos(thetap)));
+  //cout << ",  theta21 = " << theta21 << ",  theta22 = " << theta22 << endl;
   a2.RotateY(Pi()-theta21);
   a3.RotateY(Pi()+theta22);
-
+  /*
+  TLorentzVector cm = a1 + a2 + a3;
+  cout << "  b1 = " << a1.Beta();
+  cout << ",  b2 = " << a2.Beta();
+  cout << ",  b3 = " << a3.Beta();
+  cout << ",  b(cm)= " << cm.Beta();
+  cout << ",  K(cm) = " << cm.E() - cm.M() << endl;
+  
+  cout << "  theta1 = " << a1.Theta() << ",  theta2 = " << a2.Theta();
+  cout << ",  theta3 = " << a3.Theta() << endl;
+  */
+  
   //Create a SimEvent that we can hand over to the weight calculator.
   SimEvent event;
   event.decay.at(0) = a1;
@@ -58,7 +78,9 @@ double DalitzPlot::Value(double x, double y, double Q)
   //We calculate the weight for two different event orientations.
   vector<TRotation> v0 {rotations.GetRotation(0)};
   vector<TRotation> v1 {rotations.GetRotation(1)};
+  //cout << "Calc. 0:" << endl;
   double w0 = weight->Calculate(event,v0);
+  //cout << "Calc. 1:" << endl;
   double w1 = weight->Calculate(event,v1);
   //cout << "w0 = " << w0 << ",  w1 = " << w1 << endl;
 

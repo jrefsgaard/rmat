@@ -24,7 +24,7 @@ class MultiSimulationError : public ROOT::Math::IMultiGenFunction {
     MultiSimulationError();
     ~MultiSimulationError();
 
-    int AddError(Simulator model, std::shared_ptr<TH1> data);
+    int AddError(std::shared_ptr<Simulator> model, std::shared_ptr<TH1> data);
     SimulationError & GetError(int index);
 
     //XXX

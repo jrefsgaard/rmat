@@ -14,17 +14,17 @@ double MultiSimulationError::DoEval(const double *x) const
   return Evaluate();
 }
 
-int MultiSimulationError::AddError(Simulator model, shared_ptr<TH1> data)
+int MultiSimulationError::AddError(shared_ptr<Simulator> model, shared_ptr<TH1> data)
 {
   if(errors.size() > 0){
-    if(model.NDim() != NDim()){
+    if(model->NDim() != NDim()){
       cout << "MultiSimulationError::AddError(): Mismatch in NDim()!" << endl;
-      cout << "  Old NDim() = " << NDim() << ",  requested NDim() = " << model.NDim() << endl;
+      cout << "  Old NDim() = " << NDim() << ",  requested NDim() = " << model->NDim() << endl;
       exit(EXIT_FAILURE);
     }
   }
   SimulationError err(model,data);
-  errors.push_back(err);
+  errors.push_back(move(err));
   chi2.push_back(0.);
   return errors.size();
 }

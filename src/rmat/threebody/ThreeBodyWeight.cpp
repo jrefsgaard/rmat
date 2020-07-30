@@ -276,12 +276,16 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
       //We find angles and energies.
       double E1 = (alpha1.Energy() - alpha1.M());
       //cout << "  E1 = " << E1 << endl;
-      TLorentzVector rcm = alpha2 + alpha3;     //Recoil center of mass system.
-      alpha2.Boost(-rcm.BoostVector());
+      //TLorentzVector rcm = alpha2 + alpha3;     //Recoil center of mass system.
+      //alpha2.Boost(-rcm.BoostVector());
       
       TLorentzVector alpha1_bk = alpha1;
       TLorentzVector alpha2_bk = alpha2;
+      TLorentzVector alpha3_bk = alpha3;
       for(int ri=0; ri<rotations.size(); ri++){
+        alpha1 = alpha1_bk;
+        alpha2 = alpha2_bk;
+        alpha3 = alpha3_bk;
         //cout << "  Rot no: " << ri << endl;
         alpha1 *= rotations.at(ri);
         double theta1angle = alpha1.Theta();
@@ -294,6 +298,17 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
         y1.at(ri)(2,4) = sphericalHarmonic.Value(2,2,theta1angle,phi1angle);
         
         alpha2 *= rotations.at(ri);
+        alpha3 *= rotations.at(ri);
+        TLorentzVector rcm = alpha2 + alpha3;     //Recoil center of mass system.
+        /*
+        TLorentzVector cm = alpha1 + alpha2 + alpha3;
+        cout << "  b1 = " << alpha1.Beta();
+        cout << ",  b2 = " << alpha2.Beta();
+        cout << ",  b3 = " << alpha3.Beta();
+        cout << ",  b(cm)= " << cm.Beta();
+        cout << ",  K(cm) = " << cm.E() - cm.M() << endl;
+        */
+        alpha2.Boost(-rcm.BoostVector());
         double theta2 = alpha2.Theta();
         double phi2 = alpha2.Phi();
         y2.at(ri)(0,0) = sphericalHarmonic.Value(0,0,theta2,phi2);
@@ -302,12 +317,17 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
         y2.at(ri)(2,2) = sphericalHarmonic.Value(2,0,theta2,phi2);
         y2.at(ri)(2,3) = sphericalHarmonic.Value(2,1,theta2,phi2);
         y2.at(ri)(2,4) = sphericalHarmonic.Value(2,2,theta2,phi2);
+            
+        //cout << "    theta1 = " << theta1angle << ",  phi1 = " ;
+        //cout << phi1angle << ",  theta2 = " << theta2 << ",  phi2 = " ;
+        //cout << phi2 << endl;
       }
       alpha1 = alpha1_bk;
       alpha2 = alpha2_bk;
+      alpha3 = alpha3_bk;
 
-      alpha2.Boost(rcm.BoostVector());
-
+      //alpha2.Boost(rcm.BoostVector());
+      TLorentzVector rcm = alpha2 + alpha3;     //Recoil center of mass system.
       rcm.Boost(-rcm.BoostVector());
       double E23 = (rcm.Energy() - alpha2.M() - alpha3.M());//Relative energy of alpha2 and alpha3.
       double Ex2 = E23 + thresholds.at(1);
