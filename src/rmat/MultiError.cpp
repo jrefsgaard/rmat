@@ -1,8 +1,11 @@
 #include <rmat/MultiError.h>
+#include <iostream>
+
+using namespace std;
 
 namespace rmat {
 
-void MultiError::AddError(std::shared_ptr<ROOT::Math::IMultiGenFunction> error)
+void MultiError::AddError(shared_ptr<ROOT::Math::IMultiGenFunction> error)
 {
   errors.push_back(error);
 }
@@ -15,7 +18,11 @@ ROOT::Math::IBaseFunctionMultiDim & MultiError::GetError(int i)
 double MultiError::DoEval(const double *x) const
 {
   double chi = 0;
-  for(auto error : errors) chi += (*error.get())(x);
+  for(auto error : errors){
+    double chi_i = (*error.get())(x);
+    chi += chi_i;
+    cout << "Error = " << chi_i << endl;
+  }  
   return chi;
 }
 

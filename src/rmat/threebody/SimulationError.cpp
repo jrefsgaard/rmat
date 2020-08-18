@@ -24,7 +24,7 @@ double SimulationError::Evaluate() const
 {
   //Perform simulation.
   double N = _model->Simulate();
-  cout << "N = " << N << endl;
+  //cout << "N = " << N << endl;
   
   //Obtain simulated spectrum.
   int nx = _data->GetXaxis()->GetNbins();
@@ -97,7 +97,7 @@ double SimulationError::Evaluate() const
 
   nBins = error.GetNBins();
 
-  cout << "Error = " << errValue << ",  nBins = " << nBins << ",  Nsim = " << N << ",  Ndata = " << _data->Integral() << endl;
+  //cout << "Error = " << errValue << ",  nBins = " << nBins << ",  Nsim = " << N << ",  Ndata = " << _data->Integral() << endl;
   
   return errValue;
 }
