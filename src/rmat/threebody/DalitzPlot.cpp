@@ -81,14 +81,16 @@ double DalitzPlot::Value(double x, double y, double Q)
   //cout << "Calc. 0:" << endl;
   double w0 = weight->Calculate(event,v0);
   //cout << "Calc. 1:" << endl;
-  double w1 = weight->Calculate(event,v1);
+  return w0;
+  //double w1 = weight->Calculate(event,v1);
   //cout << "w0 = " << w0 << ",  w1 = " << w1 << endl;
 
+  //Ok, this seems to be unnecessary.
   //If the results are different, we average over a hundred different orientations.
-  if(IsAlmostZero(w0)) return 0;
-  else if(Abs(w1-w0) < 0.01*w0) return w0;
-  cout << "DalitzPlot::Value(): Weight not rotation invariant." << endl;
-  return weight->Calculate(event,rotations.GetRotations());
+  //if(IsAlmostZero(w0)) return 0;
+  //else if(Abs(w1-w0) < 0.01*w0) return w0;
+  //cout << "DalitzPlot::Value(): Weight not rotation invariant." << endl;
+  //return weight->Calculate(event,rotations.GetRotations());
 }
 
 void DalitzPlot::SetDecayWeight(shared_ptr<DecayWeight> w)

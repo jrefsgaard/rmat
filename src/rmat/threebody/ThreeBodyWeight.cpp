@@ -433,15 +433,18 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
                         complex<double> f = Cmmj * Omega1 * Omega23  * A1(m,n) 
                         * gammaLambda * sqrt(2.*P1/rho1 *FSCI) * Bmu * A2(mp,np)
                         * gammaLambdap*sqrt(2.*P23/rho23);
+                        //complex<double> f = Cmmj * Omega1 * Omega23  * A1(m,n) 
+                        //* gammaLambda * sqrt(2.*P1 *FSCI) * Bmu * A2(mp,np)
+                        //* gammaLambdap*sqrt(2.*P23);
                         for(int ri=0; ri<rotations.size(); ri++){
                           //cout << "  Ylm1(" << L1 << "," << ma-mb+L1 << ")" << endl;
                           complex<double> Ylm1(y1.at(ri)(L1,ma-mb+L1));
                           //complex<double> Ylm1(sphericalHarmonic.Value(L1,ma-mb,theta1angle,phi1angle));
-                          //Ylm1 *= pow(i,L1);
+                          Ylm1 *= pow(i,L1);
                           //cout << "  L2 = " << L2 << ",  mb+L2 = " << mb+L2 << endl;
                           complex<double> Ylm2(y2.at(ri)(L2,mb+L2));
                           //complex<double> Ylm2(sphericalHarmonic.Value(L2,mb,theta2,phi2));
-                          //Ylm2 *= pow(i,L2);
+                          Ylm2 *= pow(i,L2);
                           //cout << "Old way: " << Ylm1 << ",  " << Ylm2 << endl;
                           //cout << "New way: " << Ylm1_n << ",  " << Ylm2_n << endl;
                           //complex<double> f = Cmmj * Ylm1 * Ylm2 * Omega1 * Omega23  * A1(m,n) * gammaLambda * sqrt(2.*P1/rho1 *FSCI)
