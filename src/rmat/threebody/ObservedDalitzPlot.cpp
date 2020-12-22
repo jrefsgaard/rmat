@@ -1,4 +1,5 @@
 #include <rmat/threebody/ObservedDalitzPlot.h>
+#include <iostream>
 
 using namespace std;
 
@@ -42,6 +43,7 @@ shared_ptr<TH3D> ObservedDalitzPlot::GetSpectrum()
         double y = result->GetYaxis()->GetBinCenter(biny);
         double Q = result->GetZaxis()->GetBinCenter(binz);
         double f = model->Value(x,y,Q);
+        //cout << "acc = " << acc << ",  f = " << f << endl;
         result->SetBinContent(binx,biny,binz,f*acc);
       }
     }

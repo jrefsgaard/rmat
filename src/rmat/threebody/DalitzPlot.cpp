@@ -17,7 +17,7 @@ double DalitzPlot::Value(double x, double y, double Q)
 {
   double E23 = 100; //Minimum E23, to cut away 8Be(gs).
   if(y <= -1./Sqrt(3)*x || y >= 1./Sqrt(3)*x || x < 0
-    || x*x + y*y >= 0.999
+    || x*x + y*y >= 0.999//) return 0.0;
     || y < (Sqrt(3)*x-2.+4.*E23/Q)) return 0.0;
 
   //if(x*x + y*y >= 0.999) return 0.0;

@@ -114,6 +114,10 @@ double PeakWeight::Calculate(SimEvent &event)
     }
   }
   
+  //Renormalisation factor taking care of the fact that we only observe
+  //decays through the peak of the secondary state.
+  double renormalisation = scheme.GetRenormalisation(1,peakID);
+  
   //Calculate the beta-decay phase-space factor.
   double fBeta = 0.;
   int A = scheme.GetA(0);
@@ -122,6 +126,6 @@ double PeakWeight::Calculate(SimEvent &event)
   try { fBeta = logft::calculatePhaseSpace(Zi,Zf,A,Ex1);} 
   catch (...) { fBeta = 0.;}             
   //fBeta = 1.;
-  return fBeta * weight;
+  return fBeta * renormalisation * weight;
 }
 } //namespace rmat::threebody;
