@@ -15,7 +15,7 @@ class BetaSpectrum : public RMatrixSpectrum {
   * decay.
   */
   
-  private:
+  protected:
     int dZ;   //1 (beta-minus) or -1 (beta-plus)
 
   protected: 
@@ -28,14 +28,13 @@ class BetaSpectrum : public RMatrixSpectrum {
     ~BetaSpectrum();
     
     //These methods MUST be implemented.
-    double Strength(double Ec);
+    virtual double Strength(double Ec);
     //Standard order of the parameters are {E,Gamma1, Gamma2,...,B,E,Gamma1,...}.
     virtual void SetParameters(std::vector<double> par);
-    int NDim();
+    virtual int NDim();
     virtual void PrintParameters();
-
     //Decay strength from a given nuclear spin.
-    double Strength(double Ec, double J);
+    virtual double Strength(double Ec, double J);
     
     void SetType(std::string type);
     //There are at least four different ways to characterise the
