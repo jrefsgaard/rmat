@@ -37,12 +37,16 @@ void DimlessPeakSpectrum::SetParameters(vector<double> par)
     double El = par.at(l*(nChannels + 2));
     double Bl = par.at((l+1)*(nChannels+2)-1);
     std::vector<double> thetal;
+    //std::vector<double> Gammal;
     for(int c=0; c<nChannels; c++){
       double thetalc = par.at(l*(nChannels+2) + 1 + c);
+      //double Gammalc = par.at(l*(nChannels+2) + 1 + c);
       thetal.push_back(thetalc);
+      //Gammal.push_back(Gammalc); 
     }
     GetSystem().SetEnergy(l,El);
     GetSystem().SetDimensionlessWidths(l,thetal);
+    //GetSystem().SetPartialWidths(l,Gammal);
     SetBGT(l,Bl);
   }
   
@@ -72,6 +76,10 @@ double DimlessPeakSpectrum::Strength(double Ec)
   
   //Calculate renormalisation due to gating on the narrow peak only.
   double renormalisation = secondary_system.GetRenormalisation(peakID);
+  
+  //We need the two-body relative energy.
+  //TODO: This should be modified to allow for channels other than channel 0.
+  double E2b = Ec - (secondary_system.GetEnergy(peakID) - secondary_system.GetThreshold(0));
    
   for(int c : outChannels){
     double Ex = Ec + system.GetThreshold(c);
@@ -81,7 +89,7 @@ double DimlessPeakSpectrum::Strength(double Ec)
     catch (...) { fBeta = 0.;}
     
     //Calculate the penetrability using the standard two-body expression.
-    double Pc = channels_2b.at(c).Penetrability(Ec);
+    double Pc = channels_2b.at(c).Penetrability(E2b);
     
     vector<double> Js = system.GetJs();
     for(double J : Js){
