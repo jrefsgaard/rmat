@@ -46,7 +46,7 @@ void NormalisedBetaSpectrum::SetMatrixElements(vector<double> M)
 
 void NormalisedBetaSpectrum::SetMatrixElement(int lambda, double M)
 {
-  double norm = system.GetRenormalisation(lambda); // = 1/sqrt(1 + ...)
+  double norm = system.GetRenormalisation(lambda); // = 1/(1 + ...)
   double B = M * Sqrt(N * halfLife /(Pi() * constants::B)) * Sqrt(1./norm);
   SetB(lambda,B);
 }
@@ -92,6 +92,10 @@ double NormalisedBetaSpectrum::GetMatrixElement(int lambda)
   double Bl = GetB(lambda);
   double renorm = system.GetRenormalisation(lambda);
   double Ml = Sqrt(Pi() * constants::B / (N * halfLife)) * Sqrt(renorm) * Bl;
+  //cout << "GetMatrixElement():" << endl;
+  //cout << "  Bl = " << Bl << endl;
+  //cout << "  renorm = " << renorm << endl;
+  //cout << "  constant = " << Sqrt(Pi() * constants::B / (N * halfLife)) << endl;
   return Ml;
 }
 

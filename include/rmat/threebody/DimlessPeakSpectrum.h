@@ -49,7 +49,7 @@ class DimlessPeakSpectrum : public NormalisedBetaSpectrum {
     
     /**
      * Set the parameters for the decay. The order of the parameters is
-     *   {{E1,theta11,theta12,..,B(GT)1,E2,theta21,...},
+     *   {{E1,theta11,theta12,..,B1,E2,theta21,...},
      *   {E1,Gamma11,Gamma12,....,E2,Gamma21,...}}
      * where the first set of parameters is for the primary compound system
      * and the second set is for the secondary compound system.

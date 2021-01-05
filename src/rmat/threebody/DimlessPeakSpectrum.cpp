@@ -47,7 +47,8 @@ void DimlessPeakSpectrum::SetParameters(vector<double> par)
     GetSystem().SetEnergy(l,El);
     GetSystem().SetDimensionlessWidths(l,thetal);
     //GetSystem().SetPartialWidths(l,Gammal);
-    SetBGT(l,Bl);
+    //SetBGT(l,Bl);
+    SetB(l,Bl);
   }
   
   //Then the secondary compound system.
