@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <iostream>
 #include "Math/Interpolator.h"
 #include "Math/InterpolationTypes.h"
 
@@ -25,6 +26,8 @@ class Interpolator {
     //so we take special care.    
     std::unique_ptr<ROOT::Math::Interpolator> SafeConstructor
       (const std::vector<double>& vx, const std::vector<double>& vy, ROOT::Math::Interpolation::Type t = ROOT::Math::Interpolation::kCSPLINE);
+      
+    bool CheckBounds(double var) const;
     
   public:
     Interpolator(unsigned int ndata = 0, ROOT::Math::Interpolation::Type t = ROOT::Math::Interpolation::kCSPLINE);
@@ -42,10 +45,13 @@ class Interpolator {
     Interpolator & operator = (Interpolator&&);
     
     //Reimplement all const-functions from ROOT::Math::Interpolator
-    double Deriv(double var) const {return interpolator->Deriv(var);};
-    double Deriv2(double var) const {return interpolator->Deriv2(var);};
-    double Eval(double var) const {return interpolator->Eval(var);};
-    double Integ(double a, double b) const {return interpolator->Integ(a,b);};
+    double Deriv(double var) const;// {return interpolator->Deriv(var);};
+    double Deriv2(double var) const;// {return interpolator->Deriv2(var);};
+    double Eval(double var) const;// {
+      //if(var < x.front() || var > x.back())
+      //  std::cout << "Evaluating at " << var << std::endl;
+      //return interpolator->Eval(var);};
+    double Integ(double a, double b) const;// {return interpolator->Integ(a,b);};
     std::string Type() const {return interpolator->Type();};
     std::string TypeGet() const {return interpolator->TypeGet();};
 };

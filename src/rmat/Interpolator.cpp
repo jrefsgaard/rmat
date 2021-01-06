@@ -82,4 +82,34 @@ unique_ptr<ROOT::Math::Interpolator> Interpolator::SafeConstructor
   }
   return move(i);    
 }
+
+bool Interpolator::CheckBounds(double var) const
+{
+  if(var < x.front() || var > x.back()) return false;
+  else return true;
+}
+
+double Interpolator::Deriv(double var) const 
+{
+  if(CheckBounds(var)) return interpolator->Deriv(var);
+  else return 0.;
+}
+
+double Interpolator::Deriv2(double var) const
+{
+  if(CheckBounds(var)) return interpolator->Deriv2(var);
+  else return 0.;
+}
+
+double Interpolator::Eval(double var) const
+{
+  if(CheckBounds(var)) return interpolator->Eval(var);
+  else return 0.;
+}
+
+double Interpolator::Integ(double a, double b) const
+{
+  if(CheckBounds(a) && CheckBounds(b)) return interpolator->Integ(a,b);
+  else return 0.;
+}
 }//namespace rmat;
