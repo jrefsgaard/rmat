@@ -19,7 +19,7 @@ vector<double> WeightCalculator::CalculateWeights(vector<SimEvent> & raw)
   vector<double> weights (nDecays);
   vector<double> maxWeights;
   vector<unique_ptr<DecayWeight>> calculators;
-  #pragma omp parallel num_threads(8)
+  #pragma omp parallel// num_threads(8)
   {
     int nThreads = omp_get_num_threads();
     //We establish number of threads and clone the weight calculators.
