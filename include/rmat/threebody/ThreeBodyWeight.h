@@ -31,7 +31,7 @@ class ThreeBodyWeight : public DecayWeight {
     
   public:
     ThreeBodyWeight(std::string type, DoubleCompound s);
-    ~ThreeBodyWeight();
+    virtual ~ThreeBodyWeight();
     
     //virtual double Calculate(std::array<TLorentzVector,3> &);
     //virtual double Calculate(SimEvent &event);

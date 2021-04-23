@@ -453,7 +453,7 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
                           //complex<double> f = Cmmj * Ylm1 * Ylm2 * Omega1 * Omega23  * A1(m,n) * gammaLambda * sqrt(2.*P1) //*FSCI)
                           //                    * Bmu * A2(mp,np) * gammaLambdap*sqrt(2.*P23/rho23);
                           //cout << ",  accessing element (" << Ja << "," << ma+JaMax << "). = " << f << endl;
-                          amplitudes(Ja,ma+JaMax,ri) += fi;
+                          amplitudes(Ja,ma+JaMax,ri) += fi/sqrt(2*Ja+1);
                           //cout << "weight = " << norm(f) << endl;
                         }                
                       }
