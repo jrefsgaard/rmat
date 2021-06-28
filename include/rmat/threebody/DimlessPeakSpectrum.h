@@ -11,7 +11,7 @@ namespace threebody {
 /**
  * A class for calculating the beta-delayed alpha spectrum for sequential decays
  * through a narrow resonance, for instance the 8Be(gs) peak. The spectrum is
- * normalised, so it uses the proper B(GT) values as parameters. The reduces
+ * normalised, so it can print the proper B(GT) values. The reduces
  * widths are dimensionless, to avoid issues with unphysical partial widths.
  */
 class DimlessPeakSpectrum : public NormalisedBetaSpectrum {

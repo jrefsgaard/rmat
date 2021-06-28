@@ -23,6 +23,7 @@ DimlessPeakSpectrum::DimlessPeakSpectrum(string type, CompoundSystem primSys, Co
 
 void DimlessPeakSpectrum::SetParameters(vector<double> par)
 {
+   //cout << "DimlessPeakSpectrum::SetParameters()" << endl;
   if(par.size() != NDim()){
     cout << "  DimlessPeakSpectrum::SetParameters(): Wrong number of parameters, par.size() = "<< par.size() << "!" << endl;
     cout << "Expected number: " << NDim() << endl;
@@ -36,6 +37,7 @@ void DimlessPeakSpectrum::SetParameters(vector<double> par)
   for(int l=0; l<nLevels; l++){
     double El = par.at(l*(nChannels + 2));
     double Bl = par.at((l+1)*(nChannels+2)-1);
+    //cout << "  El = " << El << ",  Bl = " << Bl << endl;
     std::vector<double> thetal;
     //std::vector<double> Gammal;
     for(int c=0; c<nChannels; c++){
@@ -69,6 +71,7 @@ void DimlessPeakSpectrum::SetParameters(vector<double> par)
 
 double DimlessPeakSpectrum::Strength(double Ec)
 {
+  //cout << "  DimlessPeakSpectrum::Strength(): Ec = " << Ec << endl;
   int A = system.A();
   int Zf = system.Z();
   int Zi = Zf - dZ;
