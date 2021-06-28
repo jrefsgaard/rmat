@@ -76,12 +76,12 @@ double DalitzPlot::Value(double x, double y, double Q)
   event.y = y;
 
   //We calculate the weight for two different event orientations.
-  vector<TRotation> v0 {rotations.GetRotation(0)};
-  vector<TRotation> v1 {rotations.GetRotation(1)};
+  //vector<TRotation> v0 {rotations.GetRotation(0)};
+  //vector<TRotation> v1 {rotations.GetRotation(1)};
   //cout << "Calc. 0:" << endl;
-  double w0 = weight->Calculate(event,v0);
+  //double w0 = weight->Calculate(event,v0);
   //cout << "Calc. 1:" << endl;
-  return w0;
+  return 6 * weight->Calculate(event); //Factor 6 because of E1 > E2 > E3.
   //double w1 = weight->Calculate(event,v1);
   //cout << "w0 = " << w0 << ",  w1 = " << w1 << endl;
 

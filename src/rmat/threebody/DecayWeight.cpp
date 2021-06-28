@@ -14,10 +14,11 @@ vector<array<double,2>> & DecayWeight::GetExcludedQRanges()
 {
   return excludedQs;
 }
-
+/*
 double DecayWeight::Calculate(SimEvent &event)
 {
   vector<TRotation> v {TRotation()}; //Identity rotation.
   return Calculate(event,v);
 }
+*/
 }

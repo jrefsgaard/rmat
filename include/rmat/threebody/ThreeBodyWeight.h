@@ -34,8 +34,8 @@ class ThreeBodyWeight : public DecayWeight {
     virtual ~ThreeBodyWeight();
     
     //virtual double Calculate(std::array<TLorentzVector,3> &);
-    //virtual double Calculate(SimEvent &event);
-    virtual double Calculate(SimEvent &event, std::vector<TRotation> &rotations);
+    virtual double Calculate(SimEvent &event);
+    //virtual double Calculate(SimEvent &event, std::vector<TRotation> &rotations);
     
     /**
     * Std. ordering: First parameters for primary compound system, then for secondary system.

@@ -42,9 +42,13 @@ shared_ptr<TH3D> ObservedDalitzPlot::GetSpectrum()
         double x = result->GetXaxis()->GetBinCenter(binx);
         double y = result->GetYaxis()->GetBinCenter(biny);
         double Q = result->GetZaxis()->GetBinCenter(binz);
-        double f = model->Value(x,y,Q);
+        double w = model->Value(x,y,Q);
+        double dx = result->GetXaxis()->GetBinWidth(binx);
+        double dy = result->GetYaxis()->GetBinWidth(biny);
+        double dQ = result->GetZaxis()->GetBinWidth(binz);
+        double dN = acc * w * dx * dy * dQ;
         //cout << "acc = " << acc << ",  f = " << f << endl;
-        result->SetBinContent(binx,biny,binz,f*acc);
+        result->SetBinContent(binx,biny,binz,dN);
       }
     }
   }

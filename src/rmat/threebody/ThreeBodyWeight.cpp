@@ -205,7 +205,7 @@ double ThreeBodyWeight::Calculate(SimEvent &event)
   return Calculate(event,v);
 }
 */
-double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
+double ThreeBodyWeight::Calculate(SimEvent &event)
 {
   //Return 0 if this observed Q-value has been excluded from the calculation.
   double Qobs = event.Q;
@@ -217,121 +217,55 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
   }
 
   array<TLorentzVector,3> &decay = event.decay;
-  //cout << "line 151" << endl;
-  double Q = 0; //True Q-value of the alpha breakup.
+  
+  //True Q-value of the alpha breakup.
+  double Q = 0;
   for(auto & alpha : decay){ Q += (alpha.Energy() - alpha.M());}
   
   //Calculate excitation energy of primary system.
   double Ex1 = Q + thresholds.at(0);
 
-  //cout << "Q = " << Q << ",  Ex1 = " << Ex1 << endl;
-  
-  //We determine the maximum Ja we need to include in the sum.
   //Also check that all spins are integer.
   int JaMax = ReturnMaxSpin(scheme.GetJs(0));
  
   //Same for Jb
   int JbMax = ReturnMaxSpin(scheme.GetJs(1));
   
-  //We construct a matrix to hold the complex amplitudes from the giant summation below.
-  //Mat<complex<double>> amplitudes(JaMax+1,2*JaMax+1);
-  Cube<complex<double>> amplitudes(JaMax+1,2*JaMax+1,rotations.size());
+  Mat<complex<double>> amplitudes(JaMax+1,2*JaMax+1);
   complex<double> zero(0.,0.);
   complex<double> i(0.,1.);
   amplitudes.fill(zero);
   
-  //Limit of 100 related to container for pre-calculated Ylm.
-  if(rotations.size()>100){
-    cout << "ThreeBodyWeight::Calculate(): Too many rotations." << endl;
-    exit(EXIT_FAILURE);
-  }  
-
-  //cout << "line 171" << endl;
-  
   //Then we start the proper calculation.
   for(int Ja = 0; Ja <= JaMax; Ja++){
-    //cout << "line 175" << endl;
-    Mat<complex<double>> A1 = scheme.LevelMatrix(0,Ex1,Ja);  //Primary level matrix.
-    //cout << "line 177" << endl;
-    if(A1.size() == 0) continue; //Skip if A1 is empty (for instance if no levels of spin Ja exist).
-    //A1(0,0) = complex<double>(1,0); //XXX
-    //cout << "line 179" << endl;
-    //cout << "A1 = " << A1 << endl;
+    //Primary level matrix.
+    Mat<complex<double>> A1 = scheme.LevelMatrix(0,Ex1,Ja); 
+    //Skip if A1 is empty (for instance if no levels of spin Ja exist).
+    if(A1.size() == 0) continue;
 
     //The indices of the levels with the proper spin.
     vector<int> pIndices = scheme.GetLevelIndices(0,Ja);
       
     //Symmetrisation in the alpha particle labels.
     for(int j=0; j<3; j++){
-      //cout << "line 183" << endl;
       TLorentzVector alpha1 = decay.at(j);
       TLorentzVector alpha2 = decay.at((j+1)%3);
       TLorentzVector alpha3 = decay.at((j+2)%3);  
-      //cout << "line 187" << endl;
-      
-      //Initialise structures to hold values of spherical harmonics.
-      vector<Mat<complex<double>>> y1(100,Mat<complex<double>>(3,5));
-      vector<Mat<complex<double>>> y2(100,Mat<complex<double>>(3,5));
     
       //We find angles and energies.
       double E1 = (alpha1.Energy() - alpha1.M());
-      //cout << "  E1 = " << E1 << endl;
-      //TLorentzVector rcm = alpha2 + alpha3;     //Recoil center of mass system.
-      //alpha2.Boost(-rcm.BoostVector());
-      
-      TLorentzVector alpha1_bk = alpha1;
-      TLorentzVector alpha2_bk = alpha2;
-      TLorentzVector alpha3_bk = alpha3;
-      for(int ri=0; ri<rotations.size(); ri++){
-        alpha1 = alpha1_bk;
-        alpha2 = alpha2_bk;
-        alpha3 = alpha3_bk;
-        //cout << "  Rot no: " << ri << endl;
-        alpha1 *= rotations.at(ri);
-        double theta1angle = alpha1.Theta();
-        double phi1angle = alpha1.Phi();  //Mind confusion with HS phase shift!
-        y1.at(ri)(0,0) = sphericalHarmonic.Value(0,0,theta1angle,phi1angle);
-        y1.at(ri)(2,0) = sphericalHarmonic.Value(2,-2,theta1angle,phi1angle);
-        y1.at(ri)(2,1) = sphericalHarmonic.Value(2,-1,theta1angle,phi1angle);
-        y1.at(ri)(2,2) = sphericalHarmonic.Value(2,0,theta1angle,phi1angle);
-        y1.at(ri)(2,3) = sphericalHarmonic.Value(2,1,theta1angle,phi1angle);
-        y1.at(ri)(2,4) = sphericalHarmonic.Value(2,2,theta1angle,phi1angle);
-        
-        alpha2 *= rotations.at(ri);
-        alpha3 *= rotations.at(ri);
-        TLorentzVector rcm = alpha2 + alpha3;     //Recoil center of mass system.
-        /*
-        TLorentzVector cm = alpha1 + alpha2 + alpha3;
-        cout << "  b1 = " << alpha1.Beta();
-        cout << ",  b2 = " << alpha2.Beta();
-        cout << ",  b3 = " << alpha3.Beta();
-        cout << ",  b(cm)= " << cm.Beta();
-        cout << ",  K(cm) = " << cm.E() - cm.M() << endl;
-        */
-        alpha2.Boost(-rcm.BoostVector());
-        double theta2 = alpha2.Theta();
-        double phi2 = alpha2.Phi();
-        y2.at(ri)(0,0) = sphericalHarmonic.Value(0,0,theta2,phi2);
-        y2.at(ri)(2,0) = sphericalHarmonic.Value(2,-2,theta2,phi2);
-        y2.at(ri)(2,1) = sphericalHarmonic.Value(2,-1,theta2,phi2);
-        y2.at(ri)(2,2) = sphericalHarmonic.Value(2,0,theta2,phi2);
-        y2.at(ri)(2,3) = sphericalHarmonic.Value(2,1,theta2,phi2);
-        y2.at(ri)(2,4) = sphericalHarmonic.Value(2,2,theta2,phi2);
-            
-        //cout << "    theta1 = " << theta1angle << ",  phi1 = " ;
-        //cout << phi1angle << ",  theta2 = " << theta2 << ",  phi2 = " ;
-        //cout << phi2 << endl;
-      }
-      alpha1 = alpha1_bk;
-      alpha2 = alpha2_bk;
-      alpha3 = alpha3_bk;
+      double theta1angle = alpha1.Theta();
+      double phi1angle = alpha1.Phi();  //Mind confusion with HS phase shift!
 
-      //alpha2.Boost(rcm.BoostVector());
-      TLorentzVector rcm = alpha2 + alpha3;     //Recoil center of mass system.
+      TLorentzVector rcm = alpha2 + alpha3;  //Recoil center of mass system.
+      alpha2.Boost(-rcm.BoostVector());
+      double theta2 = alpha2.Theta();
+      double phi2 = alpha2.Phi();
+
       rcm.Boost(-rcm.BoostVector());
       double E23 = (rcm.Energy() - alpha2.M() - alpha3.M());//Relative energy of alpha2 and alpha3.
       double Ex2 = E23 + thresholds.at(1);
-      double E = Q - E23;                                   //Relative energy of alpha1 and recoil.
+      double E = Q - E23;  //Relative energy of alpha1 and recoil.
      
       //For the Coulomb correction we need the relative energies of alpha 1-2 and alpha 1-3.
       TLorentzVector cm12 = alpha1 + alpha2;
@@ -340,29 +274,21 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
       TLorentzVector cm13 = alpha1 + alpha3;
       cm13.Boost(-cm13.BoostVector());
       double E13 = cm13.Energy() - alpha1.M() - alpha3.M(); 
-    
-      //cout << "E = " << E << ", E23 = " << E23 << ",  Ex2 = " << Ex2 << endl;
  
       for(int Jb=0; Jb <= JbMax; Jb++){
-        //cout << "Jb = " << Jb << endl;
         Mat<complex<double>> A2 = scheme.LevelMatrix(1,Ex2,Jb);
         if(A2.size() == 0) continue; //Skip if matrix is empty.
         //A2(0,0) = complex<double>(1,0);//XXX
-        //cout << "line 211" << endl;
 
         //Secondary levels with proper spin.
         vector<int> sIndices = scheme.GetLevelIndices(1,Jb);
-        //cout << "line 218" << endl;
         
         //Sum over l1
         int Nl1 = scheme.GetPrimaryChannels().size();
-        //cout << "Nl1 = " << Nl1 << endl;
         for(int il=0; il<Nl1; il++){
           Channel &ci = scheme.GetPrimaryChannels().at(il);
           int L1 = ci.L();
-          //cout << "il = " << il << ",  L1 = " << L1 << endl;
           double P1 = ci.Penetrability(E);
-          //cout << "P1 = " << P1 << endl;
           double rho1 = ci.Rho(E);
           double phi1 = ci.HardSphereShift(E);
           double omega1 = ci.CoulombShift(E);
@@ -372,12 +298,8 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
           int Nl2 = scheme.GetSecondaryChannels().size();
           for(int ilp=0; ilp<Nl2; ilp++){
             double FSCI = coulombCorrector.GetFSCI(E,E23,E12,E13,il,ilp);
-            //if(FSCI >10.){ cout << "  FSCI = " << FSCI << "  " << E << "  " << E23 << "  " << E12 << "  " << E13 << "  " << il <<"  " << ilp << endl;}
-            //cout << E << "  " << E23 << "  " << E12 << "  " << E13 << "  " << il <<"  " << ilp << endl;
-            //cout << "  FSCI = " << FSCI << endl;
             Channel &cip = scheme.GetSecondaryChannels().at(ilp);
             int L2 = cip.L();
-            //cout << "ilp = " << ilp << ",  L2 = " << L2 << endl;
             double P23 = cip.Penetrability(E23);
             double rho23 = cip.Rho(E23);
             double phi23 = cip.HardSphereShift(E23);
@@ -404,9 +326,7 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
                     //cout << "np = " << np << ",  mup = " << mup << endl;
                     int c = scheme.GetChannelIndex(il,mup);
                     ClebschGordan &cg = cgCoefficients.at(il).at(mup);
-                    //cout << "L1 = " << cg.J1() << ",  Jb = " << cg.J2() << endl;
-                    //cout << "True L1 = " << L1 << ",  true Jb = " << Jb << endl; 
-                    //cout << "c = " << c << endl;
+
                     double gammaLambda = scheme.GetWidthAmplitude(0,lambda,c);
                     //cout << "gammaLambda = " << gammaLambda << endl;
                     if(IsAlmostZero(gammaLambda)) continue;
@@ -414,48 +334,34 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
                       //cout << ",  ma = " << ma ;
                       for(int mb = -Jb; mb <= Jb; mb++){
                         if(abs(ma-mb) > L1) continue;
-                        //cout << FSCI << endl;
-                        //cout << ",  mb = " << mb ;
-                        //cout << "Old CG = " << ClebschGordanFCN(L1,Jb,Ja,ma-mb,mb,ma) << endl;
-                        //cout << "New CG = " << cg.Coefficient(ma-mb,mb,Ja) << endl;
-                        //complex<double> Cmmj(ClebschGordanFCN(L1,Jb,Ja,ma-mb,mb,ma),0);
+                        
+                        //Angular part.
                         complex<double> Cmmj(cg.Coefficient(ma-mb,mb,Ja),0);
-                        //cout << "theta1 = " << theta1angle << ", phi1 = " << phi1angle << endl;
-                        //complex<double> Ylm1(spherical_harmonic(L1,ma-mb,theta1angle,phi1angle));
-                        //Ylm1 *= pow(i,L1);  //Supposedly good for time-reversal symmetry.
-                        //cout << "theta2 = " << theta2 << ", phi2 = " << phi2 << endl;
-                        //complex<double> Ylm2(spherical_harmonic(L2,mb,theta2,phi2));
-                        //Ylm2 *= pow(i,L2);
-                        //complex<double> Ylm1(SphericalHarmonic(L1,ma-mb,theta1angle,phi1angle));
-                        //Ylm1 *= pow(i,L1);
-                        //complex<double> Ylm2(SphericalHarmonic(L2,mb,theta2,phi2));
-                        //Ylm2 *= pow(i,L2);
-                        complex<double> f = Cmmj * Omega1 * Omega23  * A1(m,n) 
-                        * gammaLambda * sqrt(2.*P1/rho1 *FSCI) * Bmu * A2(mp,np)
-                        * gammaLambdap*sqrt(2.*P23/rho23);
-                        //complex<double> f = Cmmj * Omega1 * Omega23  * A1(m,n) 
-                        //* gammaLambda * sqrt(2.*P1 *FSCI) * Bmu * A2(mp,np)
-                        //* gammaLambdap*sqrt(2.*P23);
-                        for(int ri=0; ri<rotations.size(); ri++){
-                          //cout << "  Ylm1(" << L1 << "," << ma-mb+L1 << ")" << endl;
-                          complex<double> Ylm1(y1.at(ri)(L1,ma-mb+L1));
-                          //complex<double> Ylm1(sphericalHarmonic.Value(L1,ma-mb,theta1angle,phi1angle));
-                          Ylm1 *= pow(i,L1);
-                          //cout << "  L2 = " << L2 << ",  mb+L2 = " << mb+L2 << endl;
-                          complex<double> Ylm2(y2.at(ri)(L2,mb+L2));
-                          //complex<double> Ylm2(sphericalHarmonic.Value(L2,mb,theta2,phi2));
-                          Ylm2 *= pow(i,L2);
-                          //cout << "Old way: " << Ylm1 << ",  " << Ylm2 << endl;
-                          //cout << "New way: " << Ylm1_n << ",  " << Ylm2_n << endl;
-                          //complex<double> f = Cmmj * Ylm1 * Ylm2 * Omega1 * Omega23  * A1(m,n) * gammaLambda * sqrt(2.*P1/rho1 *FSCI)
-                          //                  * Bmu * A2(mp,np) * gammaLambdap*sqrt(2.*P23/rho23);
-                          complex<double> fi = f * Ylm1 * Ylm2;
-                          //complex<double> f = Cmmj * Ylm1 * Ylm2 * Omega1 * Omega23  * A1(m,n) * gammaLambda * sqrt(2.*P1) //*FSCI)
-                          //                    * Bmu * A2(mp,np) * gammaLambdap*sqrt(2.*P23/rho23);
-                          //cout << ",  accessing element (" << Ja << "," << ma+JaMax << "). = " << f << endl;
-                          amplitudes(Ja,ma+JaMax,ri) += fi/sqrt(2*Ja+1);
-                          //cout << "weight = " << norm(f) << endl;
-                        }                
+                        complex<double> Ylm1(sphericalHarmonic.Value(L1,ma-mb,theta1angle,phi1angle));
+                        complex<double> Ylm2(sphericalHarmonic.Value(L2,mb,theta2,phi2));
+                        complex<double> f = Cmmj * Ylm1 * Ylm2 / sqrt(2*Ja+1);
+                        //f *= pow(i,L1+L2); //Good for T-inversal invariance..?
+                        
+                        //Primary breakup
+                        f *= Omega1 * sqrt(P1);
+                        
+                        //Intermediate resonance part
+                        f *= Omega23 * sqrt(P23) * gammaLambdap * A2(mp,np);
+                        f /= sqrt(M_PI);
+                        
+                        //Coordinate transformation part.
+                        f /= pow(E*E23,0.25);
+                        
+                        //Normalisation factor for symmetrisation.
+                        f /= sqrt(3);
+                        
+                        //Properties of 12C resonance.
+                        f *= Bmu * A1(m,n) * gammaLambda;
+                        
+                        //Ad-hoc final-state Coulomb interaction correction
+                        f *= sqrt(FSCI);
+                        
+                        amplitudes(Ja,ma+JaMax) += f;
                       }
                     }
                   }
@@ -467,9 +373,8 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
       }
     }
   }
-
-  //double weight = sum(sum(square(abs(amplitudes))));
-  double weight = accu(square(abs(amplitudes))) / rotations.size();
+  
+  double weight = sum(sum(square(abs(amplitudes))));
   
   //Calculate the beta-decay phase-space factor.
   double fBeta = 0.;
@@ -480,8 +385,7 @@ double ThreeBodyWeight::Calculate(SimEvent &event, vector<TRotation> &rotations)
   catch (...) { fBeta = 0.;}             
   //fBeta = 1.;
 
-  //Correct for phase space, since the simulations have uniform energy distribution.
-  double PS = Q * Q;
-  return fBeta * PS * weight;
+  double PS = 2 * pow(M_PI*Q,2);
+  return PS * weight;
 }
 } //namespace rmat::threebody;
