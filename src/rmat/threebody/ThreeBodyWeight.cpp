@@ -386,6 +386,6 @@ double ThreeBodyWeight::Calculate(SimEvent &event)
   //fBeta = 1.;
 
   double PS = 2 * pow(M_PI*Q,2);
-  return PS * weight;
+  return fBeta * PS * weight;
 }
 } //namespace rmat::threebody;
